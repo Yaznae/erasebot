@@ -5,6 +5,7 @@ module.exports = {
     name: 'stfu',
     aliases: ['su', 'shutup'],
     reqPerms: [PermissionFlagsBits.ManageMessages],
+    boosterCmd: true,
     guildOnly: true,
     async execute(msg, args) {
         function isNum(str) {

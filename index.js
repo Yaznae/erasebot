@@ -29,7 +29,7 @@ bot.on('messageCreate', async (msg) => {
         let stfus = list.StfuList;
         if (stfus.includes(msg.author.id)) {
             try {
-                await msg.delete();
+                return msg.delete();
             } catch (err) {
                 return console.error(err)
             }

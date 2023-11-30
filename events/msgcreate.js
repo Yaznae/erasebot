@@ -29,10 +29,22 @@ module.exports = {
         };
 
         if (cmd.reqPerms) {
-            if (!msg.member.permissions.has(cmd.reqPerms)) {
-                let perms = new PermissionsBitField(cmd.reqPerms).toArray();
+            let perms = new PermissionsBitField(cmd.reqPerms).toArray();
+            let emb = new EmbedBuilder().setColor('#2b2d31')
+                .setDescription(`you lack the **permissions** to use this command:\n\`${perms.join('`, `')}\``);
+            if (!cmd.boosterCmd) {
+                if (!msg.member.permissions.has(cmd.reqPerms)) {
+                    return msg.reply({ embeds: [emb] });
+                }
+            } else {
+                if (msg.member.premiumSince == null) {
+                    return msg.reply({ embeds: [emb] });
+                }
+            }
+        } else if (cmd.boosterCmd) {
+            if (msg.member.premiumSince == null) {
                 let emb = new EmbedBuilder().setColor('#2b2d31')
-                    .setDescription(`you lack the **permissions** to use this command:\n\`${perms.join('`, `')}\``)
+                    .setDescription(`this is a **booster-only** command .`);
                 return msg.reply({ embeds: [emb] });
             }
         }
