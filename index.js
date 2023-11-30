@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Events, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Events, Collection, Partials } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
 const Sequelize = require('sequelize');
@@ -13,6 +13,11 @@ const bot = new Client({
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildPresences
+    ],
+    partials: [
+        Partials.GuildMember,
+        Partials.Reaction,
+        Partials.Message
     ]
 });
 
