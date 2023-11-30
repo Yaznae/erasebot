@@ -12,6 +12,7 @@
   "dependencies": {
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
+    "mongoose": "^8.0.2",
     "sequelize": "^6.35.1",
     "sqlite3": "^5.1.6",
     "time_diff_human_readable": "^1.0.2"
