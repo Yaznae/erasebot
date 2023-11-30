@@ -9,6 +9,8 @@ module.exports = {
         let member = newMem.member;
         const status = newMem.activities.find(activity => activity.type == 4)?.state;
 
+        if (!newMem.guild.id !== '1168276307151425627') return;
+
         if (!member.roles.cache.has(role)) {
             if (status && status.includes(vanity)) {
                 try {

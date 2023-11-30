@@ -1,11 +1,18 @@
-const { Events, EmbedBuilder, PermissionsBitField } = require('discord.js');
+const { Events, EmbedBuilder, PermissionsBitField, ChannelType } = require('discord.js');
 require('dotenv').config();
-const pfx = '.';
+const fs = require('node:fs');
+const info = require('../models/info');
 
 module.exports = {
     name: Events.MessageCreate,
     once: false,
     async execute(msg) {
+        if (msg.guild == null) return;
+
+        const data = await info.findOne({ GuildID: msg.guild?.id });
+        let pfx1 = data ? data.Prefix : process.env.PREFIX;
+        let pfx = msg.content.startsWith(`<@${msg.client.user.id}>`) ? `<@${msg.client.user.id}>` : pfx1;
+
         const ownerIDs = ['931514266815725599'];
 
         if (!msg.content.startsWith(pfx) || msg.author.bot) return;
