@@ -2,25 +2,12 @@ const { Events, EmbedBuilder, PermissionsBitField, ChannelType } = require('disc
 require('dotenv').config();
 const fs = require('node:fs');
 const info = require('../models/info');
-const stfulist = require('../models/stfulist');
 
 module.exports = {
     name: Events.MessageCreate,
     once: false,
     async execute(msg) {
-        if (msg.channel.type == ChannelType.DM) return;
-
-        let list = await stfulist.findOne({ GuildID: msg.guild?.id })
-
-        if (msg.guild.id === list.GuildID) {
-            if (list.StfuList.includes(msg.author.id)) {
-                try {
-                    await msg.delete();
-                } catch (err) {
-                    console.error(err);
-                };
-            };
-        };
+        if (msg.guild == null) return;
 
         const data = await info.findOne({ GuildID: msg.guild?.id });
         let pfx1 = data ? data.Prefix : process.env.PREFIX;

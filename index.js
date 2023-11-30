@@ -2,6 +2,8 @@ const { Client, GatewayIntentBits, Events, Collection } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
 const Sequelize = require('sequelize');
+const stfulist = require('./models/stfulist');
+
 require('dotenv').config();
 
 const bot = new Client({
@@ -19,6 +21,21 @@ bot.snipes = new Collection();
 
 const fPath = path.join(__dirname, 'cmd');
 const folders = fs.readdirSync(fPath);
+
+bot.on('messageCreate', async (msg) => {
+    if (msg.guild == null) return;
+    let list = await stfulist.findOne({ GuildID: msg.guild.id });
+    if (list) {
+        let stfus = list.StfuList;
+        if (stfus.includes(msg.author.id)) {
+            try {
+                await msg.delete();
+            } catch (err) {
+                return console.error(err)
+            }
+        }
+    }
+});
 
 for (const folder of folders) {
     const cPath = path.join(fPath, folder);
