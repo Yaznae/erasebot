@@ -101,9 +101,15 @@ module.exports = {
                     } else if (intr.customId == 'avhcancel') {
                         intr.deferUpdate();
                         try {
-                            await res.edit({ embeds: [emb1], components: [] });
+                            return res.edit({ embeds: [emb1], components: [] });
                         } catch (e) { console.error(e) };
                     }
+                })
+
+                nextAV.on('end', intr => {
+                    try {
+                        return res.edit({ embeds: [emb1], components: [] });
+                    } catch (e) { console.error(e) };
                 })
             } catch (err) {
                 await res.edit({ embeds: [emb1], components: [] });
