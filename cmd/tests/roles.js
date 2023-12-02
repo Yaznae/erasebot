@@ -1,22 +1,16 @@
-
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ComponentType } = require("discord.js");
+const { PermissionsBitField, EmbedBuilder, ComponentType, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require("discord.js");
 
 module.exports = {
     name: 'roles',
     guildOnly: true,
     async execute(msg, args) {
         let roles = [];
+        let positions = [];
+        let rShow = [];
         let i = 1;
-        let rolPos = await msg.guild.roles.cache.map(role => role.position).sort();
-        for (const r in rolPos.reverse()) {
-            let rol = await msg.guild.roles.cache.find(role => role.position == r)
-            roles.push(rol.id);
-        }
-        console.log(roles.reverse());
-        let lngth = roles.length;
+        let desc = ``;
+        let descs = [];
 
-        let emb = new EmbedBuilder().setColor('#2b2d31');
-        let res;
         let larrow = new ButtonBuilder()
             .setEmoji('<:leftarrow1:1179900394772639744>')
             .setCustomId('rlsleft')
@@ -30,84 +24,91 @@ module.exports = {
             .setCustomId('rlscancel')
             .setStyle(ButtonStyle.Secondary)
 
-        if (!lngth) { emb.setDescription(`this server has **no roles** .`); return msg.channel.send({ embeds: [emb] }); }
-
-        emb.setAuthor({ name: 'list of all roles :' });
-        let show = roles.splice(0, lngth >= 10 ? 10 : lngth);
-        let descs = [];
-        let desc = ``;
-        show.forEach(showing => {
-            desc += (`\`${i}\` : <@&${showing}>\n`)
+        msg.guild.roles.cache.forEach(r => positions.push(r.position));
+        positions.sort((a, b) => b - a)
+        await positions.forEach(async pos => {
+            let role = await msg.guild.roles.cache.find(r => r.position == pos);
+            roles.push(role.id);
+        });
+        if (roles.length > 10) rShow = roles.splice(0, 10);
+        rShow.forEach(rol => {
+            desc += `\`${i}\` : <@&${rol}>\n`;
             i++
         });
-        descs.push(desc)
-        emb.setDescription(desc);
-        emb.setFooter({ text: `${i - 1}/${lngth} roles` })
-        larrow.setDisabled(true);
-        console.log(roles.length);
-        if (roles.length < 10) { rarrow.setDisabled(true); }
 
+        larrow.setDisabled(true);
+        let emb = new EmbedBuilder().setColor('#2b2d31').setAuthor({ name: 'list of all roles :' });
         let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
 
-        res = await msg.channel.send({ embeds: [emb], components: [row] });
+        if (positions.length <= 10) { emb.setFooter({ text: `${positions.length}/${positions.length} roles` }) } else { emb.setFooter({ text: `10/${positions.length} roles` }) };
+        emb.setDescription(desc)
+        let res = await msg.channel.send({ embeds: [emb], components: [row] });
 
         try {
-            const nextAV = await res.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60_000 });
-            let indx = 10;
-            let desci = 1;
-            let tindx = 0;
-            let prevdsc = ``;
-            nextAV.on('collect', async intr => {
-                if (intr.user.id !== msg.author.id) return;
-                if (intr.customId == 'rlsleft') {
-                    intr.deferUpdate();
-                    indx -= 10;
-                    desci -= 1;
-                    console.log(descs[desci]);
-                    desc = prevdsc;
-                    if (indx <= 10) larrow.setDisabled(true);
-                    if (indx > lngth) { tindx = lngth };
-                    emb.setDescription(descs[desci]);
-                    emb.setFooter({ text: `${indx > lngth ? tindx : indx}/${lngth} roles` });
-                    let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
-                    try {
-                        await res.edit({ embeds: [emb], components: [row] });
-                    } catch (e) { console.error(e) };
-                } else if (intr.customId == 'rlsright') {
-                    intr.deferUpdate();
-                    prevdsc = desc;
-                    indx += 10;
-                    let amt = lngth >= 10 ? 10 : lngth
-                    let h = roles.splice(0, amt);
-                    let show2 = h;
-                    desc = ``;
-                    show2.forEach(showing2 => { desc += `\`${i}\` : <@&${showing2}>\n`; i++; });
-                    if (descs.length <= 1) descs.push(desc);
+            let roleList = await res.channel.createMessageComponentCollector({ componentType: ComponentType.Button, time: 120_000, message: res });
+            let rIndx = 10;
+            let tIndx = 0;
+            let dIndx = 0;
+
+            roleList.on('collect', async intr => {
+                if (intr.user.id !== msg.author.id) return intr.deferUpdate();
+
+                if (intr.customId == 'rlsright') {
+                    await intr.deferUpdate();
                     larrow.setDisabled(false);
-                    if (indx >= lngth) { tindx = lngth };
-                    if (tindx == lngth) rarrow.setDisabled(true);
-                    console.log(descs);
-                    emb.setDescription(desc);
-                    emb.setFooter({ text: `${indx > lngth ? tindx : indx}/${lngth} roles` });
-                    let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
-                    try {
-                        await res.edit({ embeds: [emb], components: [row] });
-                    } catch (e) { console.error(e) };
+                    let amnt = roles.length > 10 ? 10 : roles.length
+                    if (!descs[dIndx]) descs.push(desc);
+
+                    rIndx += 10;
+                    dIndx += 1;
+                    console.log(dIndx)
+                    if (rIndx >= positions.length) { rarrow.setDisabled(true); tIndx = positions.length } else { tIndx = rIndx };
+                    if (!descs[dIndx]) {
+                        desc = ``;
+                        rShow = roles.splice(0, amnt);
+                        rShow.forEach(rol => {
+                            desc += `\`${i}\` : <@&${rol}>\n`;
+                            i++
+                        });
+                        console.log(dIndx)
+                        descs.push(desc)
+                        emb.setFooter({ text: `${tIndx}/${positions.length} roles` }).setDescription(desc);
+                        return res.edit({ embeds: [emb], components: [row] });
+                    } else {
+                        console.log(dIndx)
+                        emb.setFooter({ text: `${tIndx}/${positions.length} roles` }).setDescription(descs[dIndx]);
+                        return res.edit({ embeds: [emb], components: [row] });
+                    };
+
+                } else if (intr.customId == 'rlsleft') {
+                    await intr.deferUpdate();
+                    dIndx -= 1;
+                    console.log(dIndx);
+                    rIndx -= 10;
+                    desc = descs[dIndx];
+                    emb.setFooter({ text: `${rIndx}/${positions.length} roles` }).setDescription(desc);
+                    if (rIndx == 10) larrow.setDisabled(true);
+                    rarrow.setDisabled(false);
+                    return res.edit({ embeds: [emb], components: [row] });
                 } else if (intr.customId == 'rlscancel') {
-                    intr.deferUpdate();
+                    await intr.deferUpdate();
                     try {
-                        return res.edit({ embeds: [emb], components: [] });
+                        res.edit({ embeds: [emb], components: [] });
+                        return roleList.stop();
                     } catch (e) { console.error(e) };
                 }
-            })
+            });
 
-            nextAV.on('end', intr => {
+            roleList.on('end', async intr => {
                 try {
-                    return res.edit({ embeds: [emb], components: [] });
+                    console.log('end')
+                    res.edit({ embeds: [emb], components: [] });
+                    return roleList.stop();
                 } catch (e) { console.error(e) };
             })
         } catch (err) {
             await res.edit({ embeds: [emb], components: [] });
+            console.error(err);
         }
     }
 }
