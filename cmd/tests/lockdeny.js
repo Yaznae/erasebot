@@ -4,6 +4,7 @@ module.exports = {
     name: 'lockdeny',
     aliases: ['deny', 'ld'],
     reqPerms: [PermissionFlagsBits.ManageChannels],
+    guildOnly: true,
     async execute(msg, args) {
         function isNum(str) {
             return /^\d+$/.test(str);

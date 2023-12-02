@@ -4,6 +4,7 @@ module.exports = {
     name: 'unban',
     aliases: [],
     reqPerms: [PermissionFlagsBits.BanMembers],
+    guildOnly: true,
     async execute(msg, args) {
         function isNum(str) {
             return /^\d+$/.test(str);

@@ -42,6 +42,14 @@ bot.on('messageCreate', async (msg) => {
     }
 });
 
+bot.on('userUpdate', async (oldUser, newUser) =>  {
+    if (oldUser.partial) await oldUser.fetch(true);
+
+    if (newUser.avatar !== oldUser.avatar) {
+        
+    }
+})
+
 for (const folder of folders) {
     const cPath = path.join(fPath, folder);
     const cFiles = fs.readdirSync(cPath).filter(file => file.endsWith('.js'));

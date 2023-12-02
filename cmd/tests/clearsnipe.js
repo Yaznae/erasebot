@@ -4,6 +4,7 @@ module.exports = {
     name: 'clearsnipe',
     aliases: ['clearsnipes', 'cs'],
     reqPerms: [PermissionFlagsBits.ManageMessages],
+    guildOnly: true,
     async execute(msg, args) {
         if (msg.client.snipes.get(msg.channel.id)) {
             msg.client.snipes.set(msg.channel.id, []);

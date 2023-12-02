@@ -33,8 +33,10 @@ module.exports = {
                 return errs.push(cmdName)
             };
         })
-        let emb = new EmbedBuilder().setColor('#2b2d31').setDescription(`the following commands were **reloaded** successfully :\n\`${cmds.join('`, `')}\``);
-        await msg.channel.send({ embeds: [emb] });
+        if (cmds.length) {
+            let emb = new EmbedBuilder().setColor('#2b2d31').setDescription(`the following commands were **reloaded** successfully :\n\`${cmds.join('`, `')}\``);
+            await msg.channel.send({ embeds: [emb] });
+        }
         if (errs.length) {
             let emb2 = new EmbedBuilder().setColor('#2b2d31').setDescription(`there were **problems** reloading the following commands :\n\`${errs.join('`, `')}\``);
             return msg.channel.send({ embeds: [emb2] });

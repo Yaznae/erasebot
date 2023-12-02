@@ -59,12 +59,13 @@ module.exports = {
                 res = await msg.channel.send({ embeds: [emb1], components: [row] });
             } else {
                 let avhist = avh.AvatarHistory;
+                if (avhist.includes(1)) avhist = avhist.filter(e => e !== 1);
                 emb1.setImage(avhist[0].split('#')[0])
-                    .setFooter({ text: `avatar 1/${avh.AvatarHistory.length}` })
+                    .setFooter({ text: `avatar 1/${avhist.length}` })
                     .setDescription(`<t:${avhist[0].split('#')[1]}:R>`);
 
                 larrow.setDisabled(true);
-                if (avh.AvatarHistory.length == 1) { rarrow.setDisabled(true); }
+                if (avhist.length == 1) { rarrow.setDisabled(true); }
 
                 let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
 
@@ -72,47 +73,55 @@ module.exports = {
             }
 
             try {
-                const nextAV = await res.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60_000 });
+                let nextAV = await res.channel.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60_000, message: res });
+                let avhist = avh.AvatarHistory;
+                if (avhist.includes(1)) avhist = avhist.filter(e => e !== 1);
                 let i = 0;
                 console.log(i)
-
                 nextAV.on('collect', async intr => {
                     if (intr.user.id !== msg.author.id) return;
                     if (intr.customId == 'avhleft') {
-                        intr.deferUpdate();
+                        await intr.deferUpdate();
                         i -= 1;
-                        emb1.setImage(avh.AvatarHistory[i].split('#')[0]).setFooter({ text: `avatar ${i + 1}/${avh.AvatarHistory.length}` }).setDescription(`<t:${avh.AvatarHistory[i].split('#')[1]}:R>`);
+                        emb1.setImage(avhist[i].split('#')[0]).setFooter({ text: `avatar ${i + 1}/${avhist.length}` }).setDescription(`<t:${avhist[i].split('#')[1]}:R>`);
                         if (i <= 0) larrow.setDisabled(true);
-                        if (i < avh.AvatarHistory.length - 1) rarrow.setDisabled(false);
+                        if (i < avhist.length - 1) rarrow.setDisabled(false);
                         let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
                         try {
                             await res.edit({ embeds: [emb1], components: [row] });
                         } catch (e) { console.error(e) };
                     } else if (intr.customId == 'avhright') {
-                        intr.deferUpdate();
+                        await intr.deferUpdate();
                         i += 1;
-                        emb1.setImage(avh.AvatarHistory[i].split('#')[0]).setFooter({ text: `avatar ${i + 1}/${avh.AvatarHistory.length}` }).setDescription(`<t:${avh.AvatarHistory[i].split('#')[1]}:R>`);
+                        emb1.setImage(avhist[i].split('#')[0]).setFooter({ text: `avatar ${i + 1}/${avhist.length}` }).setDescription(`<t:${avhist[i].split('#')[1]}:R>`);
                         larrow.setDisabled(false);
-                        if (i == avh.AvatarHistory.length - 1) rarrow.setDisabled(true);
+                        if (i == avhist.length - 1) rarrow.setDisabled(true);
                         let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
                         try {
                             await res.edit({ embeds: [emb1], components: [row] });
                         } catch (e) { console.error(e) };
                     } else if (intr.customId == 'avhcancel') {
-                        intr.deferUpdate();
+                        await intr.deferUpdate();
                         try {
                             return res.edit({ embeds: [emb1], components: [] });
                         } catch (e) { console.error(e) };
                     }
-                })
+                });
 
                 nextAV.on('end', intr => {
                     try {
+                        console.log('end')
                         return res.edit({ embeds: [emb1], components: [] });
                     } catch (e) { console.error(e) };
-                })
+                });
+                
             } catch (err) {
-                await res.edit({ embeds: [emb1], components: [] });
+                try {
+                    console.log(err)
+                    await res.edit({ embeds: [emb1], components: [] })
+                } catch (e) {
+                    console.error(err);
+                };
             }
         }
     }

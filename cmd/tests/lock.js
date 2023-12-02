@@ -3,6 +3,7 @@ const { PermissionFlagsBits, EmbedBuilder, PermissionsBitField } = require("disc
 module.exports = {
     name: 'lock',
     reqPerms: [PermissionFlagsBits.ManageChannels],
+    guildOnly: true,
     async execute(msg, args) {
         if (!new PermissionsBitField(msg.channel.permissionsFor(msg.guild.roles.everyone)).toArray().includes('SendMessages')) {
             let emb = new EmbedBuilder().setColor('#2b2d31').setDescription(`this channel is **already locked** .`)

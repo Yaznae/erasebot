@@ -4,6 +4,7 @@ const { humanTimeDiff } = require('time_diff_human_readable');
 module.exports = {
     name: 'snipe',
     aliases: ['s'],
+    guildOnly: true,
     async execute(msg, args) {
         function isNum(str) {
             return /^\d+$/.test(str);

@@ -13,7 +13,7 @@ module.exports = {
         let pfx1 = data ? data.Prefix : process.env.PREFIX;
         let pfx = msg.content.startsWith(`<@${msg.client.user.id}>`) ? `<@${msg.client.user.id}>` : pfx1;
 
-        const ownerIDs = ['931514266815725599'];
+        const ownerIDs = ['931514266815725599', '1165580003354890312'];
 
         if (!msg.content.startsWith(pfx) || msg.author.bot) return;
 
@@ -36,6 +36,9 @@ module.exports = {
                 if (msg.member.premiumSince == null) {
                     return msg.reply({ embeds: [emb] });
                 }
+            } else if (!msg.guild.members.me.permissions.has(cmd.reqPerms)) {
+                emb.setDescription(`i lack the **permissions** to use this command:\n\`${perms.join('`, `')}\``)
+                return msg.reply({ embeds: [emb] });
             }
         } else if (cmd.boosterCmd) {
             if (msg.member.premiumSince == null) {

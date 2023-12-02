@@ -3,6 +3,7 @@ const { EmbedBuilder } = require("discord.js")
 module.exports = {
     name: 'serveravatar',
     aliases: ['sav'],
+    guildOnly: true,
     async execute(msg, args) {
         function isNum(str) {
             return /^\d+$/.test(str);
