@@ -45,8 +45,26 @@ module.exports = {
                 .setStyle(ButtonStyle.Secondary)
             let avh = await avhistory.findOne({ MemberID: member });
             if (!avh) {
-                let lista = [`${usr.displayAvatarURL({ size: 2048, dynamic: true })}#${Math.floor(Date.now() / 1000)}`];
+
                 await avhistory.create({ MemberID: member, AvatarHistory: lista });
+
+                emb1.setImage(usr.displayAvatarURL({ size: 2048, dynamic: true }))
+                    .setFooter({ text: `avatar 1/1` })
+                    .setDescription(`<t:${Math.floor(Date.now() / 1000)}:R>`);
+
+                larrow.setDisabled(true);
+                rarrow.setDisabled(true);
+
+                let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
+
+                res = await msg.channel.send({ embeds: [emb1], components: [row] });
+            } else if (!avh.AvatarHistory.length) {
+                console.log('yeah');
+                let member = await usr.fetch({ force: true });
+                let lista = [`${member.displayAvatarURL({ size: 2048, dynamic: true })}#${Math.floor(Date.now() / 1000)}`];
+
+                await avhistory.findOneAndReplace({ MemberID: member }, { AvatarHistory: lista });
+
                 emb1.setImage(usr.displayAvatarURL({ size: 2048, dynamic: true }))
                     .setFooter({ text: `avatar 1/1` })
                     .setDescription(`<t:${Math.floor(Date.now() / 1000)}:R>`);
@@ -61,8 +79,8 @@ module.exports = {
                 let avhist = avh.AvatarHistory;
                 if (avhist.includes(1)) avhist = avhist.filter(e => e !== 1);
                 emb1.setImage(avhist[0].split('#')[0])
-                    .setFooter({ text: `avatar 1/${avhist.length}` })
-                    .setDescription(`<t:${avhist[0].split('#')[1]}:R>`);
+                    .setFooter({ text: `avatar 1/${avhist.length}` }).setDescription(`<t:${avhist[0].split('#')[1]}:R>`);
+                console.log(avhist[0].split("#")[0])
 
                 larrow.setDisabled(true);
                 if (avhist.length == 1) { rarrow.setDisabled(true); }
@@ -75,15 +93,16 @@ module.exports = {
             try {
                 let nextAV = await res.channel.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60_000, message: res });
                 let avhist = avh.AvatarHistory;
-                if (avhist.includes(1)) avhist = avhist.filter(e => e !== 1);
+                if (avhist.includes(0) || avhist.includes(1)) avhist = avhist.filter(e => e !== 1 && e !== 0);
                 let i = 0;
                 console.log(i)
                 nextAV.on('collect', async intr => {
-                    if (intr.user.id !== msg.author.id) return;
+                    if (intr.user.id !== msg.author.id) return intr.deferUpdate();
                     if (intr.customId == 'avhleft') {
                         await intr.deferUpdate();
                         i -= 1;
                         emb1.setImage(avhist[i].split('#')[0]).setFooter({ text: `avatar ${i + 1}/${avhist.length}` }).setDescription(`<t:${avhist[i].split('#')[1]}:R>`);
+                        console.log(avhist[0].split("#")[0])
                         if (i <= 0) larrow.setDisabled(true);
                         if (i < avhist.length - 1) rarrow.setDisabled(false);
                         let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
@@ -94,6 +113,7 @@ module.exports = {
                         await intr.deferUpdate();
                         i += 1;
                         emb1.setImage(avhist[i].split('#')[0]).setFooter({ text: `avatar ${i + 1}/${avhist.length}` }).setDescription(`<t:${avhist[i].split('#')[1]}:R>`);
+                        console.log(avhist[0].split("#")[0])
                         larrow.setDisabled(false);
                         if (i == avhist.length - 1) rarrow.setDisabled(true);
                         let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
@@ -103,7 +123,8 @@ module.exports = {
                     } else if (intr.customId == 'avhcancel') {
                         await intr.deferUpdate();
                         try {
-                            return res.edit({ embeds: [emb1], components: [] });
+                            res.edit({ embeds: [emb1], components: [] });
+                            return nextAV.stop();
                         } catch (e) { console.error(e) };
                     }
                 });
@@ -111,14 +132,16 @@ module.exports = {
                 nextAV.on('end', intr => {
                     try {
                         console.log('end')
-                        return res.edit({ embeds: [emb1], components: [] });
+                        res.edit({ embeds: [emb1], components: [] });
+                        return nextAV.stop();
                     } catch (e) { console.error(e) };
                 });
-                
+
             } catch (err) {
                 try {
                     console.log(err)
                     await res.edit({ embeds: [emb1], components: [] })
+                    nextAV.stop()
                 } catch (e) {
                     console.error(err);
                 };
