@@ -9,6 +9,11 @@ module.exports = {
     name: Events.MessageCreate,
     once: false,
     async execute(msg) {
+        const args = msg.content.slice(pfx.length).trim().split(/ +/);
+        const cmdName = args.shift().toLowerCase();
+
+        const cmd = msg.client.commands.get(cmdName) || msg.client.commands.find(command => command.aliases && command.aliases.includes(cmdName));
+        
         if (msg.guild == null) return;
 
         const data = await info.findOne({ GuildID: msg.guild?.id });
@@ -67,11 +72,6 @@ module.exports = {
         }
 
         if (!msg.content.startsWith(pfx) || msg.author.bot) return;
-
-        const args = msg.content.slice(pfx.length).trim().split(/ +/);
-        const cmdName = args.shift().toLowerCase();
-
-        const cmd = msg.client.commands.get(cmdName) || msg.client.commands.find(command => command.aliases && command.aliases.includes(cmdName));
 
         if (!cmd) return;
 

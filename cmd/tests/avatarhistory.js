@@ -1,10 +1,25 @@
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, ComponentType } = require("discord.js");
+const { EmbedBuilder, ButtonStyle, ButtonBuilder, AttachmentBuilder } = require("discord.js");
 const avhistory = require("../../models/avh");
+const { Pagination } = require('pagination.djs');
+const { ImgurClient } = require('imgur');
 
 module.exports = {
     name: 'avatarhistory',
     aliases: ['avh'],
+    ownerOnly: true,
     async execute(msg, args) {
+
+        const pagination = new Pagination(msg, {
+            firstEmoji: '<:skipleft:1180996476353118248>',
+            prevEmoji: '<:leftarrow1:1179900394772639744>',
+            nextEmoji: '<:rightarrow1:1179900396592955442>',
+            lastEmoji: '<:skipright:1180996474822217738>',
+            buttonStyle: ButtonStyle.Secondary,
+            idle: 30_100,
+            limit: 1,
+            loop: false
+        });
+
         function isNum(str) {
             return /^\d+$/.test(str);
         }
@@ -24,128 +39,75 @@ module.exports = {
             }
         };
 
-        let usr = await msg.client.users.cache.get(member);
-        if (!usr) {
+        let user = await msg.guild.members.cache.get(member);
+        if (!user) {
             let emb = new EmbedBuilder().setColor('#2b2d31').setDescription(`unable to find that **user** .`)
             return msg.channel.send({ embeds: [emb] });
-        } else {
-            let emb1 = new EmbedBuilder().setColor(`#2b2d31`).setAuthor({ name: `${usr.username}'s avatar history:` });
-            let res;
-            let larrow = new ButtonBuilder()
-                .setEmoji('<:leftarrow1:1179900394772639744>')
-                .setCustomId('avhleft')
-                .setStyle(ButtonStyle.Secondary);
-            let rarrow = new ButtonBuilder()
-                .setEmoji('<:rightarrow1:1179900396592955442>')
-                .setCustomId('avhright')
-                .setStyle(ButtonStyle.Secondary);
-            let cancel = new ButtonBuilder()
-                .setEmoji('<:cancel:1179902695881052311>')
-                .setCustomId('avhcancel')
-                .setStyle(ButtonStyle.Secondary)
-            let avh = await avhistory.findOne({ MemberID: member });
-            if (!avh) {
-
-                await avhistory.create({ MemberID: member, AvatarHistory: lista });
-
-                emb1.setImage(usr.displayAvatarURL({ size: 2048, dynamic: true }))
-                    .setFooter({ text: `avatar 1/1` })
-                    .setDescription(`<t:${Math.floor(Date.now() / 1000)}:R>`);
-
-                larrow.setDisabled(true);
-                rarrow.setDisabled(true);
-
-                let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
-
-                res = await msg.channel.send({ embeds: [emb1], components: [row] });
-            } else if (!avh.AvatarHistory.length) {
-                console.log('yeah');
-                let member = await usr.fetch({ force: true });
-                let lista = [`${member.displayAvatarURL({ size: 2048, dynamic: true })}#${Math.floor(Date.now() / 1000)}`];
-
-                await avhistory.findOneAndReplace({ MemberID: member }, { AvatarHistory: lista });
-
-                emb1.setImage(usr.displayAvatarURL({ size: 2048, dynamic: true }))
-                    .setFooter({ text: `avatar 1/1` })
-                    .setDescription(`<t:${Math.floor(Date.now() / 1000)}:R>`);
-
-                larrow.setDisabled(true);
-                rarrow.setDisabled(true);
-
-                let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
-
-                res = await msg.channel.send({ embeds: [emb1], components: [row] });
-            } else {
-                let avhist = avh.AvatarHistory;
-                if (avhist.includes(1)) avhist = avhist.filter(e => e !== 1);
-                emb1.setImage(avhist[0].split('#')[0])
-                    .setFooter({ text: `avatar 1/${avhist.length}` }).setDescription(`<t:${avhist[0].split('#')[1]}:R>`);
-                console.log(avhist[0].split("#")[0])
-
-                larrow.setDisabled(true);
-                if (avhist.length == 1) { rarrow.setDisabled(true); }
-
-                let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
-
-                res = await msg.channel.send({ embeds: [emb1], components: [row] });
-            }
-
-            try {
-                let nextAV = await res.channel.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60_000, message: res });
-                let avhist = avh.AvatarHistory;
-                if (avhist.includes(0) || avhist.includes(1)) avhist = avhist.filter(e => e !== 1 && e !== 0);
-                let i = 0;
-                console.log(i)
-                nextAV.on('collect', async intr => {
-                    if (intr.user.id !== msg.author.id) return intr.deferUpdate();
-                    if (intr.customId == 'avhleft') {
-                        await intr.deferUpdate();
-                        i -= 1;
-                        emb1.setImage(avhist[i].split('#')[0]).setFooter({ text: `avatar ${i + 1}/${avhist.length}` }).setDescription(`<t:${avhist[i].split('#')[1]}:R>`);
-                        console.log(avhist[0].split("#")[0])
-                        if (i <= 0) larrow.setDisabled(true);
-                        if (i < avhist.length - 1) rarrow.setDisabled(false);
-                        let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
-                        try {
-                            await res.edit({ embeds: [emb1], components: [row] });
-                        } catch (e) { console.error(e) };
-                    } else if (intr.customId == 'avhright') {
-                        await intr.deferUpdate();
-                        i += 1;
-                        emb1.setImage(avhist[i].split('#')[0]).setFooter({ text: `avatar ${i + 1}/${avhist.length}` }).setDescription(`<t:${avhist[i].split('#')[1]}:R>`);
-                        console.log(avhist[0].split("#")[0])
-                        larrow.setDisabled(false);
-                        if (i == avhist.length - 1) rarrow.setDisabled(true);
-                        let row = new ActionRowBuilder().addComponents(larrow, rarrow, cancel);
-                        try {
-                            await res.edit({ embeds: [emb1], components: [row] });
-                        } catch (e) { console.error(e) };
-                    } else if (intr.customId == 'avhcancel') {
-                        await intr.deferUpdate();
-                        try {
-                            res.edit({ embeds: [emb1], components: [] });
-                            return nextAV.stop();
-                        } catch (e) { console.error(e) };
-                    }
-                });
-
-                nextAV.on('end', intr => {
-                    try {
-                        console.log('end')
-                        res.edit({ embeds: [emb1], components: [] });
-                        return nextAV.stop();
-                    } catch (e) { console.error(e) };
-                });
-
-            } catch (err) {
-                try {
-                    console.log(err)
-                    await res.edit({ embeds: [emb1], components: [] })
-                    nextAV.stop()
-                } catch (e) {
-                    console.error(err);
-                };
-            }
         }
+
+        user = await msg.client.users.fetch(user.id, { force: true });
+
+        let avatarHistory = await avhistory.findOne({ MemberID: member });
+        let imgur = new ImgurClient({ accessToken: process.env.ACCESS_TOKEN });
+
+        if (!avatarHistory || !avatarHistory.AvatarHistory.length) {
+            if (!avatarHistory) {
+                let url;
+                if (user.avatar.startsWith('a_')) { 
+                    url = user.displayAvatarURL({ dynamic: true, size: 1024 }); 
+                } else { 
+                    url = user.displayAvatarURL({ extension: 'png', size: 1024 }); 
+                };
+
+                let postimg = await imgur.upload({ image: url, title: `${user.avatar}`, description: `erase bot avatar history for ${user.username}` });
+                let res = postimg.data;
+
+                console.log(res);
+
+                await avhistory.create({ MemberID: member, AvatarHistory: [`${res.link}#${Math.floor(Date.now() / 1000)}`] });
+            } else {
+                let url;
+                if (user.avatar.startsWith('a_')) { 
+                    url = user.displayAvatarURL({ dynamic: true, size: 1024 }); 
+                } else { 
+                    url = user.displayAvatarURL({ extension: 'png', size: 1024 }); 
+                };
+
+                let postimg = await imgur.upload({ image: url, title: `${user.avatar}`, description: `erase bot avatar history for ${user.username}` });
+                let res = postimg.data;
+
+                await avhistory.findOneAndUpdate({ MemberID: member }, { AvatarHistory: [`${res.link}#${Math.floor(Date.now() / 1000)}`] });
+            }
+
+            pagination.setAuthor({ name: `${user.username}'s avatar history:` });
+            pagination.setDescription(`<t:${Math.floor(Date.now() / 1000)}:R>`);
+            pagination.setImage(user.displayAvatarURL({ size: 1024, dynamic: true }));
+            pagination.setFooter({ text: `avatar: 1/1` });
+
+            return pagination.send();
+        } else {
+            let avis = avatarHistory.AvatarHistory;
+            let avatars = [];
+            let descs = [];
+
+            avis.forEach(async avi => {
+                let avInfo = avi.split('#');
+
+                try {
+                    avatars.push(avInfo[0]);
+                    descs.push(`<t:${avInfo[1]}:R>`);
+                } catch (e) { console.error(e); }
+
+            });
+
+            pagination.setDescriptions(descs);
+            pagination.setImages(avatars);
+            pagination.setAuthor({ name: `${user.username}'s avatar history:` });
+            pagination.setColor('#2b2d31');
+            pagination.setFooter({ text: `avatar: {pageNumber}/{totalPages}` });
+
+            return pagination.send()
+        }
+
     }
 }
