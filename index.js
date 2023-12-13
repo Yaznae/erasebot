@@ -3,6 +3,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const Sequelize = require('sequelize');
 const stfulist = require('./models/stfulist');
+let uwulist = require('./models/uwu');
+const { default: Uwuifier } = require('uwuifier');
+const keepAlive = require('./server');
 
 require('dotenv').config();
 
@@ -12,12 +15,15 @@ const bot = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildPresences
+        GatewayIntentBits.GuildPresences,
+      GatewayIntentBits.GuildMessageReactions
     ]
 });
 
 bot.commands = new Collection();
 bot.snipes = new Collection();
+bot.editsnipes = new Collection();
+bot.reactsnipes = new Collection();
 
 const fPath = path.join(__dirname, 'cmd');
 const folders = fs.readdirSync(fPath);
@@ -29,12 +35,37 @@ bot.on('messageCreate', async (msg) => {
         let stfus = list.StfuList;
         if (stfus.includes(msg.author.id)) {
             try {
-                await msg.delete();
+                return msg.delete();
             } catch (err) {
                 return console.error(err)
             }
         }
     }
+
+  let uwu = await uwulist.findOne({ ChannelID: msg.channel.id });
+  if (uwu) {
+      let webhooks = await msg.channel.fetchWebhooks()
+      let webhook = webhooks.find(w => w.url == uwu.Webhook);
+      let list = uwu.UwuList;
+      let uwuify = new Uwuifier({ words: 1, exclamations: 1, spaces: { faces: 0.3, actions: 0.075, stutters: 0.425} });
+
+      if (list.includes(msg.author.id)) {
+          try {
+              await msg.delete();
+          } catch (err) {
+              console.error(err);
+          };
+
+          await webhook.send({
+              username: msg.member.displayName,
+              avatarURL: msg.member.displayAvatarURL({ size: 2048 }),
+              content: uwuify.uwuifySentence(msg.content),
+            allowedMentions: {
+              parse: ['users']
+            }
+          })
+      }
+  }
 });
 
 for (const folder of folders) {
@@ -63,4 +94,5 @@ for (const file of events) {
     };
 };
 
+keepAlive();
 bot.login(process.env.TOKEN);

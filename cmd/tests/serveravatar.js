@@ -3,6 +3,7 @@ const { EmbedBuilder } = require("discord.js")
 module.exports = {
     name: 'serveravatar',
     aliases: ['sav'],
+    guildOnly: true,
     async execute(msg, args) {
         function isNum(str) {
             return /^\d+$/.test(str);
@@ -13,7 +14,7 @@ module.exports = {
             if (!msg.member.avatar) {
                 emb.setDescription(`you do not have a **server avatar** set .`);
             } else {
-                emb.setImage(msg.member.displayAvatarURL({ size: 2048, dynamic: true })).setAuthor({ name: `${msg.author.username}'s avatar:` });
+                emb.setImage(msg.member.displayAvatarURL({ size: 2048, dynamic: true })).setTitle(`${msg.member.nickname ? msg.member.nickname : msg.member.user.username}'s server avatar :`).setURL(msg.member.displayAvatarURL({ size: 2048, dynamic: true }));
             }
             return msg.channel.send({ embeds: [emb] });
         } else {
@@ -33,7 +34,7 @@ module.exports = {
                 if (!usr.avatar) {
                     emb.setDescription(`<@${usr.user.id}> does not have a **server avatar** set .`)
                 } else {
-                    emb.setImage(usr.displayAvatarURL({ size: 2048, dynamic: true })).setAuthor({ name: `${usr.user.username}'s avatar:` })
+                    emb.setImage(usr.displayAvatarURL({ size: 2048, dynamic: true })).setTitle(`${usr.user.username}'s avatar:`).setURL(usr.displayAvatarURL({ size: 2048, dynamic: true }));
                 }
                 return msg.channel.send({ embeds: [emb] });
             } catch (err) {

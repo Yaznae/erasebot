@@ -8,12 +8,12 @@ module.exports = {
         function isNum(str) {
             return /^\d+$/.test(str);
         }
-    
+
         if (!args.length) {
             let emb = new EmbedBuilder().setColor('#2b2d31').setDescription(`no **member** was specified .`)
             return msg.channel.send({ embeds: [emb] });
         }
-        
+
         let member;
         if (msg.mentions.users.size) {
             member = msg.mentions.users.first().id
@@ -22,6 +22,11 @@ module.exports = {
             if (mmbr) member = mmbr.id;
         } else if (isNum(args[0])) {
             member = args[0];
+        }
+
+        if (member == msg.author.id) {
+            let emb = new EmbedBuilder().setColor('#2b2d31').setDescription(`you can't ban **yourself** .`);
+            return msg.channel.send({ embeds: [emb] });
         }
 
         const usr = await msg.guild.members.cache.get(member);

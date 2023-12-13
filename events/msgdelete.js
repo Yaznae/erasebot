@@ -7,6 +7,8 @@ module.exports = {
         const snipes = msg.client.snipes.get(msg.channel.id) || [];
         const currDate = new Date();
 
+        if (msg.partial) await msg.fetch();
+
         if (msg.author.bot) return;
 
         console.log(msg.stickers.first())
@@ -18,7 +20,7 @@ module.exports = {
             date: currDate.getTime(),
             sticker: msg.stickers.first() ? msg.stickers.first() : null
         });
-        snipes.splice(10);
+        snipes.splice(20);
         msg.client.snipes.set(msg.channel.id, snipes);
     },
 };

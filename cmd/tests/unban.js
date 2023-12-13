@@ -21,6 +21,11 @@ module.exports = {
             member = args[0];
         }
 
+        if (member == msg.author.id) {
+            let emb = new EmbedBuilder().setColor('#2b2d31').setDescription(`you can't unban **yourself** .`);
+            return msg.channel.send({ embeds: [emb] });
+        }
+
         let usr;
         try {
             usr = await msg.guild.bans.fetch({ user: member, force: true });
@@ -29,6 +34,7 @@ module.exports = {
             let emb = new EmbedBuilder().setColor('#2b2d31').setDescription(`that user is **not banned** .`)
             return msg.channel.send({ embeds: [emb] });
         }
+
         try {
             args.shift()
             let rsn = args.join(' ')

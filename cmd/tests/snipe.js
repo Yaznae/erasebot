@@ -10,7 +10,7 @@ module.exports = {
         }
 
         const snipes = msg.client.snipes.get(msg.channel.id) || [];
-        
+
         if (args.length && !isNum(args[0])) return;
         if (args.length && args[0] > snipes.length) {
             let emb = new EmbedBuilder().setColor('#2b2d31').setDescription(`no **snipe** found for index \`${args[0]}\` .`);
@@ -22,10 +22,14 @@ module.exports = {
             let emb2 = new EmbedBuilder().setColor('#2b2d31').setDescription(`there's nothing to **snipe** .`);
             return msg.channel.send({ embeds: [emb2] });
         }
+        if (snipe.content.includes('cord.gg/')) {
+            let emb2 = new EmbedBuilder().setColor('#2b2d31').setDescription(`snipes cannot contain **invite links** .`);
+            return msg.channel.send({ embeds: [emb2] });
+        }
 
         let emb3 = new EmbedBuilder().setColor('#2b2d31')
             .setAuthor({ name: `@${snipe.author.username}`, iconURL: snipe.author.displayAvatarURL({ dynamic: true }) })
-            .setFooter({ text: `deleted ${humanTimeDiff(new Date().getTime(), snipe.date)} ∙ ${args[0] || 1}/${snipes.length} messages`, iconURL: msg.author.displayAvatarURL({ dynamic: true }) });
+            .setFooter({ text: `deleted ${ms(Math.floor((new Date().getTime() - snipe.date) / 1000), { long: true })} ago ∙ ${args[0] || 1}/${snipes.length} messages`, iconURL: msg.author.displayAvatarURL({ dynamic: true }) });
         if (snipe.image) emb3.setImage(snipe.image);
         if (snipe.content) emb3.setDescription(snipe.content);
         return msg.channel.send({ embeds: [emb3] });

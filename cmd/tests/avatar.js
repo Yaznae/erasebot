@@ -9,7 +9,7 @@ module.exports = {
         }
 
         if (!args.length) {
-            let emb = new EmbedBuilder().setColor('#2b2d31').setImage(msg.author.displayAvatarURL({ size: 2048, dynamic: true })).setAuthor({ name: `${msg.author.username}'s avatar:` });
+            let emb = new EmbedBuilder().setColor('#2b2d31').setImage(msg.author.displayAvatarURL({ size: 2048, dynamic: true })).setTitle(`${msg.author.username}'s avatar :`).setURL(msg.author.displayAvatarURL({ size: 2048, dynamic: true }));
             return msg.channel.send({ embeds: [emb] });
         } else {
             let member;
@@ -24,7 +24,7 @@ module.exports = {
 
             try {
                 const usr = await msg.client.users.fetch(member);
-                let emb = new EmbedBuilder().setColor('#2b2d31').setImage(usr.displayAvatarURL({ size: 2048, dynamic: true })).setAuthor({ name: `${usr.username}'s avatar:` });
+                let emb = new EmbedBuilder().setColor('#2b2d31').setImage(usr.displayAvatarURL({ size: 2048, dynamic: true })).setTitle(`${usr.username}'s avatar :`).setURL(usr.displayAvatarURL({ size: 2048, dynamic: true }));
                 return msg.channel.send({ embeds: [emb] });
             } catch (err) {
                 console.error(err);
