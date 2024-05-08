@@ -6,15 +6,15 @@ module.exports = {
     once: false,
     async execute(oldMem, newMem) {
         let vanity = '/erase'
-        let role = '1179970472771854437';
+        let role = '1163486632134070292';
         let member = newMem.member;
         const status = newMem.activities.find(activity => activity.type == 4)?.state;
         console.log(status);
 
-        if (newMem.guild.id !== '1235012141061378129') return;
+        if (newMem.guild.id !== '1163465214684045432') return;
 
         await newMem.guild.members.fetch(newMem.id);
-        let info = await sInfo.findOne({ GuildID: '1235012141061378129' });
+        let info = await sInfo.findOne({ GuildID: '1163465214684045432' });
         if (!info) {
             return
         };

@@ -30,7 +30,7 @@ module.exports = {
             let role = await msg.guild.roles.cache.find(r => r.position == pos);
             roles.push(role.id);
         });
-        if (roles.length > 1) {
+        if (roles.length < 1) {
             let emb = new EmbedBuilder()
                 .setColor('2b2d31')
                 .setDescription(`this server has no roles .`)
@@ -67,7 +67,6 @@ module.exports = {
 
                     rIndx += 10;
                     dIndx += 1;
-                    console.log(dIndx)
                     if (rIndx >= positions.length) { rarrow.setDisabled(true); tIndx = positions.length } else { tIndx = rIndx };
                     if (!descs[dIndx]) {
                         desc = ``;
@@ -76,12 +75,10 @@ module.exports = {
                             desc += `\`${i}\` : <@&${rol}>\n`;
                             i++
                         });
-                        console.log(dIndx)
                         descs.push(desc)
                         emb.setFooter({ text: `${tIndx}/${positions.length} roles` }).setDescription(desc);
                         return res.edit({ embeds: [emb], components: [row] });
                     } else {
-                        console.log(dIndx)
                         emb.setFooter({ text: `${tIndx}/${positions.length} roles` }).setDescription(descs[dIndx]);
                         return res.edit({ embeds: [emb], components: [row] });
                     };
@@ -89,7 +86,6 @@ module.exports = {
                 } else if (intr.customId == 'rlsleft') {
                     await intr.deferUpdate();
                     dIndx -= 1;
-                    console.log(dIndx);
                     rIndx -= 10;
                     desc = descs[dIndx];
                     emb.setFooter({ text: `${rIndx}/${positions.length} roles` }).setDescription(desc);
@@ -107,7 +103,6 @@ module.exports = {
 
             roleList.on('end', async intr => {
                 try {
-                    console.log('end')
                     res.edit({ embeds: [emb], components: [] });
                     return roleList.stop();
                 } catch (e) { console.error(e) };

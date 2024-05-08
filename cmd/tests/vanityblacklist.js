@@ -25,7 +25,7 @@ module.exports = {
         };
 
         let user = await msg.guild.members.cache.get(member);
-        let role = '1179970472771854437';
+        let role = '1163486632134070292';
 
 
         let info = await sInfo.findOne({ GuildID: msg.guild.id });
