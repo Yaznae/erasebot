@@ -24,9 +24,10 @@ module.exports = {
             return msg.channel.send({ embeds: [emb2] });
         }
 
+        let currTime = new Date().getTime() 
         let emb3 = new EmbedBuilder().setColor('#2b2d31')
             .setAuthor({ name: `@${snipe.author.username}`, iconURL: snipe.author.displayAvatarURL({ dynamic: true }) })
-            .setFooter({ text: `deleted ${humanTimeDiff(new Date().getTime(), snipe.date)} ∙ ${args[0] || 1}/${snipes.length} messages`, iconURL: msg.author.displayAvatarURL({ dynamic: true }) });
+            .setFooter({ text: `deleted ${(currTime - snipe.date) > 5_000 ? humanTimeDiff(currTime, snipe.date) : 'just now'} ∙ ${args[0] || 1}/${snipes.length} messages`, iconURL: msg.author.displayAvatarURL({ dynamic: true }) });
         if (snipe.image) emb3.setImage(snipe.image);
         if (snipe.content) emb3.setDescription(snipe.content);
         return msg.channel.send({ embeds: [emb3] });

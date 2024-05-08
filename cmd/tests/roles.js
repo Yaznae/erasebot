@@ -30,6 +30,12 @@ module.exports = {
             let role = await msg.guild.roles.cache.find(r => r.position == pos);
             roles.push(role.id);
         });
+        if (roles.length > 1) {
+            let emb = new EmbedBuilder()
+                .setColor('2b2d31')
+                .setDescription(`this server has no roles .`)
+            return msg.reply({ embeds: [emb] })
+        }
         if (roles.length > 10) rShow = roles.splice(0, 10);
         rShow.forEach(rol => {
             desc += `\`${i}\` : <@&${rol}>\n`;

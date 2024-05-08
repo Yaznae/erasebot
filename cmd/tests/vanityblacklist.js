@@ -7,6 +7,10 @@ module.exports = {
     guildOnly: true,
     reqPerms: [PermissionFlagsBits.Administrator],
     async execute(msg, args) {
+        function isNum(str) {
+            return /^\d+$/.test(str);
+        }
+
         let emb = new EmbedBuilder().setColor('#2b2d31')
 
         let member;
@@ -21,17 +25,13 @@ module.exports = {
         };
 
         let user = await msg.guild.members.cache.get(member);
-        let role = '1179571138628694128';
+        let role = '1179970472771854437';
 
-        if (!user) {
-            emb.setDescription(`> invalid **member** passed .`)
-            return msg.channel.send({ embeds: [emb] });
-        }
 
         let info = await sInfo.findOne({ GuildID: msg.guild.id });
 
         if (!args.length) {
-            if (!info || !info.BlackList) {
+            if (!info || !info.BlackList || !info.BlackList.length) {
                 emb.setDescription(`> this server has no **blacklisted members** .`);
                 return msg.channel.send({ embeds: [emb] });
             } else {
@@ -40,9 +40,17 @@ module.exports = {
                 list.forEach(id => mentions.push(`<:tailarrow:1181760833458556938> <@${id}>`));
                 emb.setAuthor({ name: 'list of blacklisted members :' });
                 emb.setDescription(`${mentions.join('\n')}`);
+                emb.setFooter({ text: `${list.length} user${list.length == 1 ? '' : 's'}` });
                 return msg.channel.send({ embeds: [emb] });
             }
-        } else if (!info) {
+        }
+
+        if (!user) {
+            emb.setDescription(`> invalid **member** passed .`)
+            return msg.channel.send({ embeds: [emb] });
+        }
+
+        if (!info) {
             await sInfo.create({ GuildID: msg.guild.id, Prefix: process.env.PREFIX, BlackList: [member] });
             emb.setDescription(`> <@${member}> was added to the **vanity blacklist** .`);
 
@@ -78,7 +86,7 @@ module.exports = {
             } else {
                 bl.push(member);
                 await sInfo.findOneAndUpdate({ GuildID: msg.guild.id }, { BlackList: bl });
-                emb.setDescription(`> <@${member}> was removed from the **vanity blacklist** .`);
+                emb.setDescription(`> <@${member}> was added to the **vanity blacklist** .`);
 
                 if (user.roles.cache.has(role)) {
                     try {

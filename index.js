@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const Sequelize = require('sequelize');
 const stfulist = require('./models/stfulist');
+const keepAlive = require('./server')
 
 require('dotenv').config();
 
@@ -12,17 +13,23 @@ const bot = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildPresences
+        GatewayIntentBits.GuildPresences,
+        GatewayIntentBits.GuildMessageReactions
     ],
     partials: [
         Partials.GuildMember,
         Partials.Reaction,
         Partials.Message
-    ]
+    ],
+    allowedMentions: {
+        repliedUser: false
+    }
 });
 
 bot.commands = new Collection();
 bot.snipes = new Collection();
+bot.editsnipes = new Collection();
+bot.reactsnipes = new Collection();
 
 const fPath = path.join(__dirname, 'cmd');
 const folders = fs.readdirSync(fPath);
@@ -70,4 +77,5 @@ for (const file of events) {
     };
 };
 
+keepAlive();
 bot.login(process.env.TOKEN);

@@ -39,7 +39,7 @@ module.exports = {
             }
         };
 
-        let user = await msg.guild.members.cache.get(member);
+        let user = await msg.client.users.cache.get(member);
         if (!user) {
             let emb = new EmbedBuilder().setColor('#2b2d31').setDescription(`unable to find that **user** .`)
             return msg.channel.send({ embeds: [emb] });

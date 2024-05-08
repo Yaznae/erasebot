@@ -9,18 +9,13 @@ module.exports = {
     name: Events.MessageCreate,
     once: false,
     async execute(msg) {
-        const args = msg.content.slice(pfx.length).trim().split(/ +/);
-        const cmdName = args.shift().toLowerCase();
-
-        const cmd = msg.client.commands.get(cmdName) || msg.client.commands.find(command => command.aliases && command.aliases.includes(cmdName));
-        
         if (msg.guild == null) return;
 
         const data = await info.findOne({ GuildID: msg.guild?.id });
         let pfx1 = data ? data.Prefix : process.env.PREFIX;
         let pfx = msg.content.startsWith(`<@${msg.client.user.id}>`) ? `<@${msg.client.user.id}>` : pfx1;
 
-        const ownerIDs = ['931514266815725599', '1165580003354890312'];
+        const ownerIDs = ['931514266815725599', '231317222088376320'];
 
         if (msg.mentions.users.size) {
             let afkPing = await afklist.findOne({ MemberID: msg.mentions.users.first().id });
@@ -62,7 +57,7 @@ module.exports = {
             }
         }
 
-        if (msg.guild.id == '1179970472771854436') {
+        if (msg.guild.id == '1235012141061378129') {
             if (msg.content.includes('pic perm')) {
                 let emb = new EmbedBuilder()
                     .setColor('#2b2d31')
@@ -72,6 +67,11 @@ module.exports = {
         }
 
         if (!msg.content.startsWith(pfx) || msg.author.bot) return;
+
+        const args = msg.content.slice(pfx.length).trim().split(/ +/);
+        const cmdName = args.shift().toLowerCase();
+
+        const cmd = msg.client.commands.get(cmdName) || msg.client.commands.find(command => command.aliases && command.aliases.includes(cmdName));
 
         if (!cmd) return;
 

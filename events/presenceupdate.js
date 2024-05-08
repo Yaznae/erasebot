@@ -11,15 +11,20 @@ module.exports = {
         const status = newMem.activities.find(activity => activity.type == 4)?.state;
         console.log(status);
 
-        if (newMem.guild.id !== '1179970472771854436') return;
+        if (newMem.guild.id !== '1235012141061378129') return;
 
         await newMem.guild.members.fetch(newMem.id);
-        let info = await sInfo.findOne({ GuildID: '1179970472771854436' });
+        let info = await sInfo.findOne({ GuildID: '1235012141061378129' });
+        if (!info) {
+            return
+        };
         let list = info.BlackList;
 
-        if (list.includes(newMem.id)) return;
+        if (list.includes(newMem.user.id)) {
+            return console.log(`# ${newMem.user.username} (${newMem.user.id}) is blacklisted !!`)
+        };
 
-        if (!member.roles.cache.has(role)) {
+        if (!member.roles.cache.has(role) && !list.includes(newMem.user.id)) {
             if (status && status.includes(vanity)) {
                 try {
                     member.roles.add(role);
